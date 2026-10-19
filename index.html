@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전주정 완전정복</title>
+<style>html,body{margin:0;min-height:100%;background:#1F2B38;color:#F4EEDD;font-family:system-ui,-apple-system,sans-serif}.loading{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}.box{max-width:420px}.spinner{width:36px;height:36px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;margin:0 auto 16px;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}small{opacity:.75}</style>
+</head>
+<body><div class="loading"><div class="box"><div class="spinner"></div><b>학습카드 불러오는 중</b><br><small>처음 접속할 때 잠시 로딩될 수 있습니다.</small></div></div>
+<script>
+(async()=>{
+ try{
+  let b64='';
+  for(let i=0;i<4;i++){
+   const r=await fetch(`payload/chunk${i}.txt`,{cache:'force-cache'});
+   if(!r.ok) throw new Error(`chunk ${i}: ${r.status}`);
+   b64+=(await r.text()).trim();
+  }
+  const raw=atob(b64);
+  const bytes=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
+  if(!('DecompressionStream' in window)) throw new Error('이 브라우저는 압축 해제를 지원하지 않습니다. 최신 Chrome/Safari로 열어 주세요.');
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const html=await new Response(stream).text();
+  document.open();document.write(html);document.close();
+ }catch(e){
+  document.body.innerHTML=`<div class="loading"><div class="box"><b>페이지를 불러오지 못했습니다.</b><p>${String(e.message||e)}</p><small>페이지를 새로고침하거나 최신 Chrome/Safari에서 다시 열어 주세요.</small></div></div>`;
+ }
+})();
+</script></body></html>
